@@ -2,6 +2,9 @@
 
 package lesson1
 
+import java.io.File
+
+
 /**
  * Сортировка времён
  *
@@ -63,7 +66,47 @@ fun sortTimes(inputName: String, outputName: String) {
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
 fun sortAddresses(inputName: String, outputName: String) {
-    TODO()
+    File(outputName).bufferedWriter().use { writer ->
+        val a = sortedMapOf<String, String>()
+        val map = mutableMapOf<Pair<String, Int>, MutableList<List<String>>>()
+        val list = mutableListOf<List<String>>()
+        File(inputName).forEachLine { line ->
+
+
+            list.add(line.split(Regex(""" - |\s""")))
+//            val nameAndAddress = line.split(" - ")
+//            val address = nameAndAddress[1].split(" ").let { it[0] to it[1].toInt() }
+//            map[address]?.add(nameAndAddress[0].split(" ")) ?: run {
+//                map[address] = mutableListOf(nameAndAddress[0].split(" "))
+//            }
+        }
+
+        var previousAddress = Pair("", "")
+        var isFirstOut = true
+
+        list.sortedWith(compareBy({ it[2] }, { it[3].toInt() }, { it[0] }, { it[1] })).forEach {
+            if (it[2] == previousAddress.first && it[3] == previousAddress.second) {
+                writer.write(", ${it[0]} ${it[1]}")
+            } else {
+                if (!isFirstOut) writer.newLine() else isFirstOut = false
+                previousAddress = (it[2] to it[3])
+                writer.write("${it[2]} ${it[3]} - ${it[0]} ${it[1]}")
+            }
+        }
+
+//        map.toList().sortedWith(compareBy({ it.first.first }, { it.first.second })).forEach { pair ->
+//            writer.write(String.format("%s %d - %s\n",
+//                pair.first.first, pair.first.second,
+//                pair.second.sortedWith(compareBy({ it[0] }, { it[1] })).joinToString(", ") {
+//                    it.joinToString(" ")
+//                })
+//            )
+//        }
+    }
+}
+
+fun main() {
+    sortAddresses("input/addr_in1.txt", "input/myTMP.txt")
 }
 
 /**
