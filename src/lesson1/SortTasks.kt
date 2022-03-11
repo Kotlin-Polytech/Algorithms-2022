@@ -66,47 +66,24 @@ fun sortTimes(inputName: String, outputName: String) {
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
 fun sortAddresses(inputName: String, outputName: String) {
+    val list = mutableListOf<List<String>>()
+    val (surname, name) = 0 to 1
+    val (address, house) = 3 to 4
+    File(inputName).forEachLine { line -> list.add(line.split(" ")) }
+
+    var previousAddress = Pair("", "")
+    var isFirstOut = true
     File(outputName).bufferedWriter().use { writer ->
-        val a = sortedMapOf<String, String>()
-        val map = mutableMapOf<Pair<String, Int>, MutableList<List<String>>>()
-        val list = mutableListOf<List<String>>()
-        File(inputName).forEachLine { line ->
-
-
-            list.add(line.split(Regex(""" - |\s""")))
-//            val nameAndAddress = line.split(" - ")
-//            val address = nameAndAddress[1].split(" ").let { it[0] to it[1].toInt() }
-//            map[address]?.add(nameAndAddress[0].split(" ")) ?: run {
-//                map[address] = mutableListOf(nameAndAddress[0].split(" "))
-//            }
-        }
-
-        var previousAddress = Pair("", "")
-        var isFirstOut = true
-
-        list.sortedWith(compareBy({ it[2] }, { it[3].toInt() }, { it[0] }, { it[1] })).forEach {
-            if (it[2] == previousAddress.first && it[3] == previousAddress.second) {
-                writer.write(", ${it[0]} ${it[1]}")
+        list.sortedWith(compareBy({ it[address] }, { it[house].toInt() }, { it[surname] }, { it[name] })).forEach {
+            if (it[address] == previousAddress.first && it[house] == previousAddress.second) {
+                writer.write(", ${it[surname]} ${it[name]}")
             } else {
                 if (!isFirstOut) writer.newLine() else isFirstOut = false
-                previousAddress = (it[2] to it[3])
-                writer.write("${it[2]} ${it[3]} - ${it[0]} ${it[1]}")
+                previousAddress = (it[address] to it[house])
+                writer.write("${it[address]} ${it[house]} - ${it[surname]} ${it[name]}")
             }
         }
-
-//        map.toList().sortedWith(compareBy({ it.first.first }, { it.first.second })).forEach { pair ->
-//            writer.write(String.format("%s %d - %s\n",
-//                pair.first.first, pair.first.second,
-//                pair.second.sortedWith(compareBy({ it[0] }, { it[1] })).joinToString(", ") {
-//                    it.joinToString(" ")
-//                })
-//            )
-//        }
     }
-}
-
-fun main() {
-    sortAddresses("input/addr_in1.txt", "input/myTMP.txt")
 }
 
 /**
@@ -140,7 +117,14 @@ fun main() {
  * 121.3
  */
 fun sortTemperatures(inputName: String, outputName: String) {
-    TODO()
+    val minNegative = 273
+    val list = mutableListOf<Int>()
+    File(inputName).forEachLine { list.add((it.toDouble() * 10 + minNegative * 10).toInt()) }
+    File(outputName).bufferedWriter().use { writer ->
+        countingSort(list.toIntArray(), list.maxOrNull() ?: 0).forEach {
+            writer.write(((it - minNegative * 10) / 10.0).toString()).also { writer.newLine() }
+        }
+    }
 }
 
 /**
