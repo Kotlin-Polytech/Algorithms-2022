@@ -122,8 +122,10 @@ fun sortTemperatures(inputName: String, outputName: String) {
     File(inputName).forEachLine { list.add((it.toDouble() * 10 + minNegative * 10).toInt()) }
     File(outputName).bufferedWriter().use { writer ->
         countingSort(list.toIntArray(), list.maxOrNull() ?: 0).forEach {
-            writer.write(((it - minNegative * 10) / 10.0).toString()).also { writer.newLine() }
+            writer.write(((it - minNegative * 10) / 10.0).toString()); writer.newLine()
         }
+        val stringBuilder = java.lang.StringBuilder()
+        stringBuilder.removeSuffix(" ")
     }
 }
 
