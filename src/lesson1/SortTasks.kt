@@ -64,17 +64,30 @@ fun sortTimes(inputName: String, outputName: String) {
  * Садовая 5 - Сидоров Петр, Сидорова Мария
  *
  * В случае обнаружения неверного формата файла бросить любое исключение.
+ *
+ *
+ *
+ *
+ * N = Кол-во строк в Файле
+ * n = Кол-во символов в строке
+ *
+ *
+ * R = O(N * 5) = O(N)
+ * T = O(N) + O(N * log(N)) = O(N * log(N))
  */
 fun sortAddresses(inputName: String, outputName: String) {
+
     val list = mutableListOf<List<String>>()
     val (surname, name) = 0 to 1
     val (address, house) = 3 to 4
-    File(inputName).forEachLine { line -> list.add(line.split(" ")) }
+    File(inputName).forEachLine { line -> list.add(line.split(" ")) } // O(N * n)
+
 
     var previousAddress = Pair("", "")
     var isFirstOut = true
     File(outputName).bufferedWriter().use { writer ->
         list.sortedWith(compareBy({ it[address] }, { it[house].toInt() }, { it[surname] }, { it[name] })).forEach {
+            // Merge sort O(N log(N))
             if (it[address] == previousAddress.first && it[house] == previousAddress.second) {
                 writer.write(", ${it[surname]} ${it[name]}")
             } else {
@@ -115,13 +128,17 @@ fun sortAddresses(inputName: String, outputName: String) {
  * 24.7
  * 99.5
  * 121.3
+ *
+ *
+ * R = O(N) + O(max(N * 10 + 1)) = O(max(N * 10 + 1))
+ * T = O(N)
  */
 fun sortTemperatures(inputName: String, outputName: String) {
     val minNegative = 273
     val list = mutableListOf<Int>()
-    File(inputName).forEachLine { list.add((it.toDouble() * 10 + minNegative * 10).toInt()) }
+    File(inputName).forEachLine { list.add((it.toDouble() * 10 + minNegative * 10).toInt()) } // O(N)
     File(outputName).bufferedWriter().use { writer ->
-        countingSort(list.toIntArray(), list.maxOrNull() ?: 0).forEach {
+        countingSort(list.toIntArray(), list.maxOrNull() ?: 0).forEach { // O(N) + O(N)
             writer.write(((it - minNegative * 10) / 10.0).toString()); writer.newLine()
         }
         val stringBuilder = java.lang.StringBuilder()

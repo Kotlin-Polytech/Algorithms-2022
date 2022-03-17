@@ -120,6 +120,9 @@ abstract class AbstractAlgorithmsTests {
                 File("input/ruslan_ludmila_2.txt").readText()
             ).trim()
         )
+        // my test - full match
+        assertEquals("Hello, world", longestCommonSubstring("Hello, world", "Hello, world"))
+        assertEquals("", longestCommonSubstring("", "")) // zero string
     }
 
     fun calcPrimesNumber(calcPrimesNumber: (Int) -> Int) {
@@ -148,5 +151,11 @@ abstract class AbstractAlgorithmsTests {
         assertEquals(148933, calcPrimesNumber(2000000))
         assertEquals(348513, calcPrimesNumber(5000000))
         assertEquals(664579, calcPrimesNumber(10000000))
+        // my tests
+        assertEquals(0, calcPrimesNumber(0))
+        assertEquals(5761455, calcPrimesNumber(100000000)) // Performance test: числа большие 10^10 в
+        // теории решетом Аткина находить быстрее, но в случае с Int - в теории быстрее решето Эратосфена
+
+
     }
 }

@@ -93,6 +93,12 @@ fun josephTask(menNumber: Int, choiceInterval: Int): Int {
  * При сравнении подстрок, регистр символов *имеет* значение.
  * Если имеется несколько самых длинных общих подстрок одной длины,
  * вернуть ту из них, которая встречается раньше в строке first.
+ *
+ * N - длинна 1го слова
+ * M - длинна 2го слова
+ *
+ * R = O(N * M)
+ * T = O(N * M)
  */
 fun longestCommonSubstring(first: String, second: String): String {
     val matchTable = Array(first.length) { IntArray(second.length) { 0 } }
@@ -123,19 +129,22 @@ fun longestCommonSubstring(first: String, second: String): String {
  *
  * Справка: простым считается число, которое делится нацело только на 1 и на себя.
  * Единица простым числом не считается.
+ *
+ * R = O(N + 1)
+ * T = O(N *(ln(ln(N))) + O(N / 2) + O(N) = O(N *(ln(ln(N)))
+ *
  */
 fun calcPrimesNumber(limit: Int): Int {
-    // Решето Эратросфена
+    // Решето Эратосфена
     val primesList = BooleanArray(limit + 1) // boolArr of false
 
-    for (i in 3..limit step 2) primesList[i] = true
-    for (i in 4..limit step 2) primesList[i] = false
+    for (i in 3..limit step 2) primesList[i] = true // O(N / 2)
     if (limit > 1) primesList[2] = true
 
-    for (i in 3..limit step 2) {
-        for (j in i + i..limit step i) primesList[j] = false
+    for (i in 3..limit step 2) { // O(N *(ln(ln(N)))
+        if (primesList[i]) for (j in i + i..limit step i) primesList[j] = false
     }
 
-    return primesList.count { it }
+    return primesList.count { it } // O(N)
 
 }
