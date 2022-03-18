@@ -2,6 +2,8 @@
 
 package lesson2
 
+import java.util.BitSet
+
 /**
  * Получение наибольшей прибыли (она же -- поиск максимального подмассива)
  * Простая
@@ -130,21 +132,25 @@ fun longestCommonSubstring(first: String, second: String): String {
  * Справка: простым считается число, которое делится нацело только на 1 и на себя.
  * Единица простым числом не считается.
  *
- * R = O(N + 1)
- * T = O(N *(ln(ln(N))) + O(N / 2) + O(N) = O(N *(ln(ln(N)))
+ * R = O(N/2)
+ * T = O(N *(ln(ln(N)))
  *
  */
 fun calcPrimesNumber(limit: Int): Int {
-    // Решето Эратосфена
-    val primesList = BooleanArray(limit + 1) // boolArr of false
+    // Решето Эратосфена по не четным
+    if (limit < 2) return 0
+    val size = if (limit % 2 == 0) limit / 2 - 1 else limit / 2
+    val primesList = BitSet(size)
+    for (i in 0 until size) primesList[i] = true
 
-    for (i in 3..limit step 2) primesList[i] = true // O(N / 2)
-    if (limit > 1) primesList[2] = true
-
-    for (i in 3..limit step 2) { // O(N *(ln(ln(N)))
-        if (primesList[i]) for (j in i + i..limit step i) primesList[j] = false
+    for (i in 3..limit step 2) {
+        if (primesList[i / 2 - 1] && i < Int.MAX_VALUE / 2) {
+            for (j in i + i..limit step i) if (j % 2 != 0) primesList[j / 2 - 1] = false
+        }
     }
 
-    return primesList.count { it } // O(N)
+    var primeNumber = 1
+    for (i in 0 until size) if (primesList[i]) primeNumber++
+    return primeNumber
 
 }

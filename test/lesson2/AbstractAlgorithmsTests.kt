@@ -151,9 +151,10 @@ abstract class AbstractAlgorithmsTests {
         assertEquals(148933, calcPrimesNumber(2000000))
         assertEquals(348513, calcPrimesNumber(5000000))
         assertEquals(664579, calcPrimesNumber(10000000))
-        // my tests
+        // my tests краевые случаи
         assertEquals(0, calcPrimesNumber(0))
-        assertEquals(5761455, calcPrimesNumber(100000000)) // Performance test: числа большие 10^10 в
+        assertEquals(105097565, calcPrimesNumber(Int.MAX_VALUE))
+        // Performance test: числа большие 10^10 в
         // теории решетом Аткина находить быстрее, но в случае с Int - в теории быстрее решето Эратосфена
 
 
