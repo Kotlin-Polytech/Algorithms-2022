@@ -30,6 +30,20 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
         }
     }
 
+    private fun findWithParentOrNull(
+        start: Node<T>,
+        value: T,
+        parent: Node<T>?,
+        isRightChild: Boolean
+    ): Triple<Node<T>, Node<T>?, Boolean>? {
+        val comparison = value.compareTo(start.value)
+        return when {
+            comparison == 0 -> Triple(start, parent, isRightChild)
+            comparison < 0 -> start.left?.let { findWithParentOrNull(it, value, start, false) }
+            else -> start.right?.let { findWithParentOrNull(it, value, start, true) }
+        }
+    }
+
     override operator fun contains(element: T): Boolean {
         val closest = find(element)
         return closest != null && element.compareTo(closest.value) == 0
@@ -79,8 +93,59 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
      *
      * Средняя
      */
+
+
+    private fun deleteNode(replacement: Node<T>?, parent: Node<T>?, isRightChild: Boolean) {
+        when (isRightChild) {
+            true -> parent?.let { it.right = replacement } ?: run { root = replacement }
+            false -> parent?.let { it.left = replacement } ?: run { root = replacement }
+        }
+
+    }
+
+//    private fun findMaxInLeftWithParent(start: Node<T>): Pair<Node<T>, Node<T>> = start.right?.let { findMaxInLeft(it) } ?: start
+
     override fun remove(element: T): Boolean {
-        TODO()
+        val (foundNode, foundParent, isRightChild) =
+            findWithParentOrNull(root ?: return false, element, null, false) ?: return false
+
+        when {
+            foundNode.left == null && foundNode.right == null -> deleteNode(null, foundParent, isRightChild)
+            foundNode.left != null && foundNode.right == null -> deleteNode(foundNode.left, foundParent, isRightChild)
+            foundNode.right != null && foundNode.left == null -> deleteNode(foundNode.right, foundParent, isRightChild)
+            else -> {
+                //turn left
+                var isRight: Boolean = false
+                var maxNode = foundNode.left
+                var maxParent: Node<T>? = foundNode
+
+                // max in left part()
+                while (maxNode!!.right != null) {
+                    isRight = true
+                    maxParent = maxNode; maxNode = maxNode.right
+                }
+                // node deletion
+                maxParent?.apply {
+                    if (isRight) right = maxNode.left
+                    else left = maxNode.left
+                }
+
+                maxNode.apply {
+                    right = foundNode.right; foundNode.right = null
+                    left = foundNode.left; foundNode.left = null
+                }
+
+                if (foundParent != null) {
+                    if (isRightChild) foundParent.right = maxNode
+                    else foundParent.left = maxNode
+                } else {
+                    root = maxNode
+                }
+            }
+        }
+        size--
+        return true
+
     }
 
     override fun comparator(): Comparator<in T>? =
