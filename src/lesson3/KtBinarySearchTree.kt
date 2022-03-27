@@ -6,7 +6,7 @@ import kotlin.math.max
 // attention: Comparable is supported but Comparator is not
 class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), CheckableSortedSet<T> {
 
-    private class Node<T>(
+    private open class Node<T>(
         val value: T
     ) {
         var left: Node<T>? = null
@@ -155,6 +155,20 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
         BinarySearchTreeIterator()
 
     inner class BinarySearchTreeIterator internal constructor() : MutableIterator<T> {
+        private val nodeStack = Stack<Node<T>>()
+        private var current = root
+
+
+        private fun minInLeft() {
+            while (current != null) {
+                nodeStack.push(current)
+                current = current!!.left
+            }
+        }
+
+        init {
+            minInLeft()
+        }
 
         /**
          * Проверка наличия следующего элемента
@@ -166,10 +180,7 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          *
          * Средняя
          */
-        override fun hasNext(): Boolean {
-            // TODO
-            throw NotImplementedError()
-        }
+        override fun hasNext(): Boolean = nodeStack.isNotEmpty()
 
         /**
          * Получение следующего элемента
@@ -184,9 +195,18 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          *
          * Средняя
          */
+        private var lastNode: Node<T>? = null
+
         override fun next(): T {
-            // TODO
-            throw NotImplementedError()
+            if (hasNext()) {
+                lastNode = nodeStack.pop()
+
+                if (lastNode!!.right != null) {
+                    current = lastNode!!.right
+                    minInLeft()
+                }
+                return lastNode!!.value
+            } else throw NoSuchElementException()
         }
 
         /**
@@ -202,8 +222,9 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          * Сложная
          */
         override fun remove() {
-            // TODO
-            throw NotImplementedError()
+            if (lastNode == null) throw IllegalStateException()
+            this@KtBinarySearchTree.remove(lastNode!!.value)
+            lastNode = null
         }
 
     }
