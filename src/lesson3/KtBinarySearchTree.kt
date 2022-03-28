@@ -92,6 +92,12 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
      * (в Котлине тип параметера изменён с Object на тип хранимых в дереве данных)
      *
      * Средняя
+     *
+     * N - количество элементов
+     * h - высота дерева
+     *
+     * R = O(1)
+     * T = O(h)
      */
 
 
@@ -103,11 +109,9 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
 
     }
 
-//    private fun findMaxInLeftWithParent(start: Node<T>): Pair<Node<T>, Node<T>> = start.right?.let { findMaxInLeft(it) } ?: start
-
     override fun remove(element: T): Boolean {
         val (foundNode, foundParent, isRightChild) =
-            findWithParentOrNull(root ?: return false, element, null, false) ?: return false
+            findWithParentOrNull(root ?: return false, element, null, false) ?: return false // O(h)
 
         when {
             foundNode.left == null && foundNode.right == null -> deleteNode(null, foundParent, isRightChild)
@@ -115,12 +119,12 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
             foundNode.right != null && foundNode.left == null -> deleteNode(foundNode.right, foundParent, isRightChild)
             else -> {
                 //turn left
-                var isRight: Boolean = false
+                var isRight = false
                 var maxNode = foundNode.left
                 var maxParent: Node<T>? = foundNode
 
                 // max in left part()
-                while (maxNode!!.right != null) {
+                while (maxNode!!.right != null) { // O(h)
                     isRight = true
                     maxParent = maxNode; maxNode = maxNode.right
                 }
@@ -159,7 +163,7 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
         private var current = root
 
 
-        private fun minInLeft() {
+        private fun minInLeft() { // O(h)
             while (current != null) {
                 nodeStack.push(current)
                 current = current!!.left
@@ -179,6 +183,10 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          * Спецификация: [java.util.Iterator.hasNext] (Ctrl+Click по hasNext)
          *
          * Средняя
+         *
+         * R = O(h) (для работы функции необходим стэк)
+         * T = O(1)
+         *
          */
         override fun hasNext(): Boolean = nodeStack.isNotEmpty()
 
@@ -194,6 +202,10 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          * Спецификация: [java.util.Iterator.next] (Ctrl+Click по next)
          *
          * Средняя
+         *
+         *
+         * R = O(h) (для работы функции необходим стэк)
+         * T = O(h)
          */
         private var lastNode: Node<T>? = null
 
@@ -220,10 +232,14 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          * Спецификация: [java.util.Iterator.remove] (Ctrl+Click по remove)
          *
          * Сложная
+         *
+         *
+         * R = O(h) (для работы функции необходим стэк)
+         * T = O(h)
          */
         override fun remove() {
             if (lastNode == null) throw IllegalStateException()
-            this@KtBinarySearchTree.remove(lastNode!!.value)
+            this@KtBinarySearchTree.remove(lastNode!!.value) // O(h)
             lastNode = null
         }
 

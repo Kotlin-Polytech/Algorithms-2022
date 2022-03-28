@@ -162,6 +162,16 @@ abstract class AbstractBinarySearchTreeTest {
             }
             println("All clear!")
         }
+
+
+        println("Additional tests")
+        val binarySet = create()
+        assertFalse(binarySet.remove(8)) // remove non-existent element from empty tree
+        binarySet.add(0) // 0 is root of the tree
+        assertTrue(binarySet.remove(0)) // root should be null
+        assertEquals(0, binarySet.height())
+        assertEquals(0, binarySet.size)
+        println("All clear!")
     }
 
     protected fun doIteratorTest() {
@@ -205,6 +215,43 @@ abstract class AbstractBinarySearchTreeTest {
             }
             println("All clear!")
         }
+
+        // my tests
+
+        fun oneSideTreeTest(function: (CheckableSortedSet<Int>, MutableSet<Int>) -> Unit) {
+            println("Additional tests")
+            val binaryRightSet = create()
+            val controlRightSet = mutableSetOf<Int>()
+            println("adding elements to tree and set")
+            for (a in 0..50) { // right-only tree
+                binaryRightSet.add(a)
+                controlRightSet.add(a)
+            }
+            println("Control set = $controlRightSet")
+            val iter1 = binaryRightSet.iterator()
+            val iter2 = controlRightSet.iterator()
+
+            while (iter1.hasNext()) {
+                assertEquals(iter1.next(), iter2.next())
+            }
+            assertFalse(iter2.hasNext()) // check for all items to traverse
+
+            println("All clear!")
+        }
+
+        oneSideTreeTest { tree, set ->
+            for (a in 0..50) { // right-only tree
+                tree.add(a)
+                set.add(a)
+            }
+        }
+        oneSideTreeTest { tree, set ->
+            for (a in 50 downTo 0) { // left-only tree
+                tree.add(a)
+                set.add(a)
+            }
+        }
+
     }
 
     protected fun doIteratorRemoveTest() {
@@ -272,6 +319,16 @@ abstract class AbstractBinarySearchTreeTest {
             }
             println("All clear!")
         }
+
+        println("Additional tests")
+        val binarySet = create()
+        binarySet.add(0) // 0 is root of the tree
+        val iter = binarySet.iterator()
+        iter.next() // goto root
+        iter.remove() // root should be null
+        assertEquals(0, binarySet.height())
+        assertEquals(0, binarySet.size)
+        println("All clear!")
     }
 
     protected fun doSubSetTest() {
