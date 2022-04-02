@@ -4,6 +4,7 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.test.*
 import org.junit.jupiter.api.assertDoesNotThrow
+import ru.spbstu.wheels.stack
 import kotlin.IllegalStateException
 import kotlin.NoSuchElementException
 
@@ -179,19 +180,23 @@ abstract class AbstractBinarySearchTreeTest {
         implementationTest { create().iterator().next() }
         val random = Random()
         for (iteration in 1..100) {
+            val binarySet = create()
             val controlSet = TreeSet<Int>()
+
             for (i in 1..20) {
+                val rand = random.nextInt(100)
                 controlSet.add(random.nextInt(100))
             }
             println("Control set: $controlSet")
-            val binarySet = create()
             assertFalse(
                 binarySet.iterator().hasNext(),
                 "Iterator of an empty tree should not have any next elements."
             )
-            for (element in controlSet) {
+            for (element in controlSet.shuffled()) { //randomized addition of elements
                 binarySet += element
+
             }
+
             val iterator1 = binarySet.iterator()
             val iterator2 = binarySet.iterator()
             println("Checking if calling hasNext() changes the state of the iterator...")
@@ -223,10 +228,7 @@ abstract class AbstractBinarySearchTreeTest {
             val binaryRightSet = create()
             val controlRightSet = mutableSetOf<Int>()
             println("adding elements to tree and set")
-            for (a in 0..50) { // right-only tree
-                binaryRightSet.add(a)
-                controlRightSet.add(a)
-            }
+            function(binaryRightSet, controlRightSet)
             println("Control set = $controlRightSet")
             val iter1 = binaryRightSet.iterator()
             val iter2 = controlRightSet.iterator()
@@ -248,7 +250,7 @@ abstract class AbstractBinarySearchTreeTest {
         oneSideTreeTest { tree, set ->
             for (a in 50 downTo 0) { // left-only tree
                 tree.add(a)
-                set.add(a)
+                set.add(50 - a)
             }
         }
 
@@ -259,6 +261,9 @@ abstract class AbstractBinarySearchTreeTest {
         val random = Random()
         for (iteration in 1..100) {
             val controlSet = TreeSet<Int>()
+
+            val controlledSet = mutableSetOf<Int>()
+
             val removeIndex = random.nextInt(20) + 1
             var toRemove = 0
             for (i in 1..20) {
@@ -270,11 +275,17 @@ abstract class AbstractBinarySearchTreeTest {
             }
             println("Initial set: $controlSet")
             val binarySet = create()
-            for (element in controlSet) {
+            for (element in controlSet.shuffled()) { //randomized adding of elements
                 binarySet += element
+
+                controlledSet += element
+
             }
             controlSet.remove(toRemove)
             println("Control set: $controlSet")
+
+            println("controlled set = $controlledSet")
+
             println("Removing element $toRemove from the tree through the iterator...")
             val iterator = binarySet.iterator()
             assertFailsWith<IllegalStateException>("Something was supposedly removed before the iteration started") {
