@@ -149,7 +149,6 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
     override fun remove(element: T): Boolean {
         val (foundNode, foundParent, isRightChild) =
             findWithParentOrNull(root ?: return false, element, null, false) ?: return false // O(h)
-        println("   remove found node=${foundNode.value}, parent=${foundParent?.value}, $isRightChild")
         remove(foundNode, foundParent, isRightChild)
         return true
     }
@@ -162,13 +161,16 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
 
     inner class BinarySearchTreeIterator internal constructor() : MutableIterator<T> {
         private val nodeStack = Stack<Node<T>>()
-        private var current = root
+        private val nodeParentStack = Stack<Node<T>>()
+        private var lastNode: Node<T>? = null
+        private var lastParent: Node<T>? = null
 
-        private var currentNodeParent: Node<T>? = null
+        private var current = root
 
         private fun minInLeft() { // O(h)
             while (current != null) {
                 nodeStack.push(current)
+                if (current!!.left != null) nodeParentStack.push(current)
                 current = current!!.left
             }
         }
@@ -210,20 +212,17 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          * R = O(h) (для работы функции необходим стэк)
          * T = O(h)
          */
-        private var lastNode: Node<T>? = null
-        private var lastParent: Node<T>? = null
+
 
         override fun next(): T {
             if (hasNext()) {
                 lastNode = nodeStack.pop()
-                lastParent = currentNodeParent
+                lastParent = nodeParentStack.removeLastOrNull()
 
                 if (lastNode!!.right != null) {
-                    currentNodeParent = lastNode
+                    nodeParentStack.push(lastNode)
                     current = lastNode!!.right
                     minInLeft()
-                } else if (nodeStack.isNotEmpty()) {
-                    lastParent = nodeStack.last()
                 }
                 return lastNode!!.value
             } else throw NoSuchElementException()
@@ -247,10 +246,7 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          */
         override fun remove() {
             if (lastNode == null) throw IllegalStateException()
-            println("\n   iter found node=${lastNode!!.value}, parent= ${lastParent?.value}, ${lastParent?.right == lastNode}, stack= ${nodeStack.map { it.value }}\n" +
-                    "   parent.left= ${lastParent?.left?.value}, parent.right = ${lastParent?.right?.value}")
-            this@KtBinarySearchTree.remove(lastNode!!, lastParent, lastParent?.right == lastNode)
-//            this@KtBinarySearchTree.remove(lastNode!!.value)
+            remove(lastNode!!, lastParent, lastParent?.right == lastNode)
             lastNode = null
         }
     }

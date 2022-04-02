@@ -340,6 +340,20 @@ abstract class AbstractBinarySearchTreeTest {
         assertEquals(0, binarySet.height())
         assertEquals(0, binarySet.size)
         println("All clear!")
+        println("Additional tests")
+
+
+        val binarySet2 = create()
+        binarySet2.add(0) // 0 is root of the tree
+        binarySet2.add(5)
+        val iter2 = binarySet2.iterator()
+        iter2.next() // goto root
+        iter2.remove() // root should be 5
+        assertEquals(1, binarySet2.height())
+        assertEquals(1, binarySet2.size)
+        println("removing five")
+        assertEquals(5, iter2.next())
+        println("All clear!")
     }
 
     protected fun doSubSetTest() {
