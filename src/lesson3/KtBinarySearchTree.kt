@@ -112,7 +112,7 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
         when {
             foundNode.left == null && foundNode.right == null -> deleteNode(null, foundParent, isRightChild)
             foundNode.left != null && foundNode.right == null -> deleteNode(foundNode.left, foundParent, isRightChild)
-            foundNode.right != null && foundNode.left == null -> deleteNode(foundNode.right, foundParent, isRightChild)
+            foundNode.left == null -> deleteNode(foundNode.right, foundParent, isRightChild)
             else -> {
                 //turn left
                 var isRight = false
