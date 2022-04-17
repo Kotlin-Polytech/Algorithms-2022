@@ -70,8 +70,35 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
      *
      * Сложная
      */
-    override fun iterator(): MutableIterator<String> {
-        TODO()
-    }
+    override fun iterator() = TrieIterator()
 
+
+    inner class TrieIterator internal constructor() : MutableIterator<String> {
+        private val wordList = mutableListOf<String>()
+        private val currentString = Stack<Char>()
+        var index = 0
+
+        private fun findNextString(start: Node, isZero: Boolean) {
+            if (!isZero) {
+                for (childNode in start.children) {
+                    currentString.push(childNode.key)
+                    findNextString(childNode.value, childNode.key == 0.toChar())
+                    currentString.pop()
+                }
+            } else {
+                wordList.add(currentString.joinToString("").dropLast(1))
+            }
+        }
+
+        init {
+            findNextString(root, false)
+        }
+
+        override fun hasNext(): Boolean = index < wordList.size
+        override fun next(): String = wordList[index++]
+
+        override fun remove() {
+            TODO("Not yet implemented")
+        }
+    }
 }
