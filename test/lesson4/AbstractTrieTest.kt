@@ -1,10 +1,12 @@
 package lesson4
 
+import ru.spbstu.kotlin.generate.util.nextString
 import java.util.*
 import kotlin.math.abs
-import ru.spbstu.kotlin.generate.util.nextString
-import kotlin.NoSuchElementException
-import kotlin.test.*
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 abstract class AbstractTrieTest {
 
@@ -110,6 +112,27 @@ abstract class AbstractTrieTest {
             }
             println("All clear!")
         }
+
+        // My Tests
+        fun myTest(set: SortedSet<String>) {
+            val trie = KtTrie()
+            set.forEach { trie.add(it) }
+
+            val iter = set.iterator()
+            trie.forEach {
+                assertEquals(it, iter.next())
+            }
+        }
+        myTest(sortedSetOf("a", "b", "c", "cc"))
+        myTest(sortedSetOf("a", "aa", "b", "c"))
+        myTest(sortedSetOf<String>())
+
+        val trie = KtTrie()
+        val iter = trie.iterator()
+        assertFalse(iter.hasNext())
+        assertFailsWith<NoSuchElementException> {
+            iter.next()
+        }
     }
 
     protected fun doIteratorRemoveTest() {
@@ -163,6 +186,7 @@ abstract class AbstractTrieTest {
                     "Trie set doesn't have the element $element from the control set."
                 )
             }
+            for (element in trieSet) println(element)
             for (element in trieSet) {
                 assertTrue(
                     controlSet.contains(element),
@@ -171,6 +195,31 @@ abstract class AbstractTrieTest {
             }
             println("All clear!")
         }
-    }
+        // MyTests
+        fun myTest(set: SortedSet<String>, vararg removeStrings:String ) {
+            val trie = KtTrie()
+            set.forEach { trie.add(it) }
+            for (string in removeStrings) {
+                set.remove(string)
+                trie.remove(string)
+            }
 
+            val iter = set.iterator()
+            trie.forEach {
+                assertEquals(it, iter.next())
+            }
+        }
+        myTest(sortedSetOf("a", "b", "c", "cc"), "c")
+        myTest(sortedSetOf("a", "b", "c", "cc"), "cc")
+        myTest(sortedSetOf("a", "aa", "b", "c"), "a")
+        myTest(sortedSetOf<String>())
+
+        val trie = KtTrie()
+        trie.add("hello")
+        val iter = trie.iterator()
+        assertFailsWith<IllegalStateException>{ iter.remove() }
+        iter.next()
+        iter.remove()
+        assertFailsWith<IllegalStateException>{ iter.remove() }
+    }
 }

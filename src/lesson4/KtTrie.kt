@@ -63,32 +63,26 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
         return false
     }
 
-    /**
-     * Итератор для префиксного дерева
-     *
-     * Спецификация: [java.util.Iterator] (Ctrl+Click по Iterator)
-     *
-     * Сложная
-     */
-    override fun iterator() = TrieIterator()
 
-    @Suppress("IncorrectFormatting")
+    /**
+     * для оценок трудоемкости и ресурсоемкости: h = высота дерева
+     */
     inner class TrieIterator internal constructor() : MutableIterator<String> {
         private val charStack = Stack<Char>()
         private val forkStack = Stack<MutableIterator<MutableMap.MutableEntry<Char, Node>>>()
-        private var currentNode = root
         private var currentString: String = ""
         private var currentIter: MutableIterator<MutableMap.MutableEntry<Char, Node>>? = null
-        private var savedIterator: MutableIterator<MutableMap.MutableEntry<Char, Node>>? = null
+        private val savedSize = size
+        var foundStr = 0
+
 
         private fun findNextString(stop: Boolean) {
             if (!stop) {
                 if (forkStack.lastElement().hasNext()) {
                     val entry = forkStack.lastElement().next()
                     charStack.push(entry.key)
-                    currentNode = entry.value
                     currentIter = forkStack.lastElement()
-                    val currentIterator = currentNode.children.iterator()
+                    val currentIterator = entry.value.children.iterator()
                     forkStack.push(currentIterator)
                     findNextString(entry.key == 0.toChar())
                 } else {
@@ -96,7 +90,7 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
                         forkStack.pop()
                         charStack.pop()
                     }
-                    findNextString(charStack.isEmpty() && !forkStack.lastElement().hasNext())
+                    findNextString(charStack.isEmpty() && !forkStack[0].hasNext())
                 }
             } else {
                 if (charStack.isNotEmpty()) {
@@ -111,64 +105,46 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
             if (root.children.isNotEmpty()) {
                 forkStack.push(root.children.iterator())
             }
-            findNextString(root.children.isEmpty())
         }
 
-        override fun hasNext(): Boolean = currentString != ""
+
+        /**
+         * R = O(h) (для работы функции необходим стэк)
+         * T = O(1)
+         */
+        override fun hasNext(): Boolean = foundStr != savedSize && savedSize != 0
+
+        /**
+         * R = O(h) (для работы функции необходим стэк)
+         * T = O(h)
+         */
         override fun next(): String {
             if (hasNext()) {
-                savedIterator = currentIter
-                return currentString.also {
-//                    lastParentIterator = currentIterator
-//                    println(lastParentIterator)
-                    findNextString(false)
-                }
+                findNextString(false)
+                foundStr++
+                return currentString
             } else throw NoSuchElementException()
         }
 
+        /**
+         * R = O(h) (для работы функции необходим стэк)
+         * T = O(1)
+         */
         override fun remove() {
-            savedIterator?.apply {
+            currentIter?.apply {
                 remove()
                 size--
-                savedIterator = null
+                currentIter = null
             } ?: throw IllegalStateException()
         }
-//            lastParentNode?.apply {
-//                size--
-//                children.remove(0.toChar())
-//                lastParentNode = null
-//            } ?: throw IllegalStateException()
-//            if (isDeleted) throw IllegalStateException()
-//            remove(lastString).also { isDeleted = true }
-//        }
     }
 
-
-//    inner class TrieIterator internal constructor() : MutableIterator<String> {
-//        private val wordList = mutableListOf<String>()
-//        private val currentString = Stack<Char>()
-//        var index = 0
-//        var isDeleted = true
-//
-//        private fun findAllString(start: Node, stop: Boolean, currString: String) {
-//            if (!stop) {
-//                start.children.forEach { (key, value) ->
-//                    findAllString(value, key == 0.toChar(), currString + key)
-//                }
-//            } else wordList.add(currString.dropLast(1))
-//        }
-//
-//        init {
-//            findAllString(root, false, "")
-//        }
-//
-//        override fun hasNext(): Boolean = index < wordList.size
-//        override fun next(): String =
-//            if (hasNext()) wordList[index++].also { isDeleted = false } else throw NoSuchElementException()
-//
-//        override fun remove() {
-//            if (isDeleted) throw IllegalStateException()
-//            remove(wordList[index - 1]).also { isDeleted = true }
-//        }
-//    }
+    /**
+     * Итератор для префиксного дерева
+     *
+     * Спецификация: [java.util.Iterator] (Ctrl+Click по Iterator)
+     *
+     * Сложная
+     */
+    override fun iterator() = TrieIterator()
 }
