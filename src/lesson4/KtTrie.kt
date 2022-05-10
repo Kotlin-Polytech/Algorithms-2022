@@ -72,33 +72,103 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
      */
     override fun iterator() = TrieIterator()
 
-
+    @Suppress("IncorrectFormatting")
     inner class TrieIterator internal constructor() : MutableIterator<String> {
-        private val wordList = mutableListOf<String>()
-        private val currentString = Stack<Char>()
-        var index = 0
+        private val charStack = Stack<Char>()
+        private val forkStack = Stack<MutableIterator<MutableMap.MutableEntry<Char, Node>>>()
+        private var currentNode = root
+        private var currentString: String = ""
+        private var currentIter: MutableIterator<MutableMap.MutableEntry<Char, Node>>? = null
+        private var savedIterator: MutableIterator<MutableMap.MutableEntry<Char, Node>>? = null
 
-        private fun findNextString(start: Node, isZero: Boolean) {
-            if (!isZero) {
-                for (childNode in start.children) {
-                    currentString.push(childNode.key)
-                    findNextString(childNode.value, childNode.key == 0.toChar())
-                    currentString.pop()
+        private fun findNextString(stop: Boolean) {
+            if (!stop) {
+                if (forkStack.lastElement().hasNext()) {
+                    val entry = forkStack.lastElement().next()
+                    charStack.push(entry.key)
+                    currentNode = entry.value
+                    currentIter = forkStack.lastElement()
+                    val currentIterator = currentNode.children.iterator()
+                    forkStack.push(currentIterator)
+                    findNextString(entry.key == 0.toChar())
+                } else {
+                    if (charStack.isNotEmpty()) {
+                        forkStack.pop()
+                        charStack.pop()
+                    }
+                    findNextString(charStack.isEmpty() && !forkStack.lastElement().hasNext())
                 }
             } else {
-                wordList.add(currentString.joinToString("").dropLast(1))
+                if (charStack.isNotEmpty()) {
+                    charStack.pop()
+                    forkStack.pop()
+                }
+                currentString = charStack.joinToString("")
             }
         }
 
         init {
-            findNextString(root, false)
+            if (root.children.isNotEmpty()) {
+                forkStack.push(root.children.iterator())
+            }
+            findNextString(root.children.isEmpty())
         }
 
-        override fun hasNext(): Boolean = index < wordList.size
-        override fun next(): String = wordList[index++]
+        override fun hasNext(): Boolean = currentString != ""
+        override fun next(): String {
+            if (hasNext()) {
+                savedIterator = currentIter
+                return currentString.also {
+//                    lastParentIterator = currentIterator
+//                    println(lastParentIterator)
+                    findNextString(false)
+                }
+            } else throw NoSuchElementException()
+        }
 
         override fun remove() {
-            TODO("Not yet implemented")
+            savedIterator?.apply {
+                remove()
+                size--
+                savedIterator = null
+            } ?: throw IllegalStateException()
         }
+//            lastParentNode?.apply {
+//                size--
+//                children.remove(0.toChar())
+//                lastParentNode = null
+//            } ?: throw IllegalStateException()
+//            if (isDeleted) throw IllegalStateException()
+//            remove(lastString).also { isDeleted = true }
+//        }
     }
+
+
+//    inner class TrieIterator internal constructor() : MutableIterator<String> {
+//        private val wordList = mutableListOf<String>()
+//        private val currentString = Stack<Char>()
+//        var index = 0
+//        var isDeleted = true
+//
+//        private fun findAllString(start: Node, stop: Boolean, currString: String) {
+//            if (!stop) {
+//                start.children.forEach { (key, value) ->
+//                    findAllString(value, key == 0.toChar(), currString + key)
+//                }
+//            } else wordList.add(currString.dropLast(1))
+//        }
+//
+//        init {
+//            findAllString(root, false, "")
+//        }
+//
+//        override fun hasNext(): Boolean = index < wordList.size
+//        override fun next(): String =
+//            if (hasNext()) wordList[index++].also { isDeleted = false } else throw NoSuchElementException()
+//
+//        override fun remove() {
+//            if (isDeleted) throw IllegalStateException()
+//            remove(wordList[index - 1]).also { isDeleted = true }
+//        }
+//    }
 }
